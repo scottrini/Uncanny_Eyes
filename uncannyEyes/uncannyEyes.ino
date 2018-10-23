@@ -710,10 +710,35 @@ uint32_t Wheel(byte WheelPos) {
 
 uint8_t j = 0;
 
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 1000;
+int buttonState;            
+int lastButtonState = LOW;
+
 void loop() {
+  int reading = LOW;
   if (qt_1.measure() > 700) {
-    stripEnabled = !stripEnabled;
+    reading = HIGH;
   }
+
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    if (reading != buttonState) {
+      buttonState = reading;
+      stripEnabled = !stripEnabled;
+      if (!stripEnabled) {
+        for(int32_t i=0; i< strip.numPixels(); i++) {
+           strip.setPixelColor(i, strip.Color(0, 0, 0));
+        }
+        strip.show();
+      }
+    }
+  }
+
+  lastButtonState = reading;
+  
   if (stripEnabled) {
     for(int32_t i=0; i< strip.numPixels(); i++) {
        strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j*5) & 255));
@@ -721,6 +746,7 @@ void loop() {
     j++;
     strip.show();
   }
+  
   
 
 #if defined(LIGHT_PIN) && (LIGHT_PIN >= 0) // Interactive iris
