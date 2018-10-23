@@ -19,9 +19,21 @@
 
 #include <SPI.h>
 #include <Adafruit_GFX.h>
+#include <Adafruit_FreeTouch.h>
+#include <Adafruit_NeoPixel.h>
 #ifdef ARDUINO_ARCH_SAMD
   #include <Adafruit_ZeroDMA.h>
 #endif
+
+Adafruit_FreeTouch qt_1 = Adafruit_FreeTouch(A2, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
+Adafruit_FreeTouch qt_2 = Adafruit_FreeTouch(A3, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
+Adafruit_FreeTouch qt_3 = Adafruit_FreeTouch(A4, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
+Adafruit_FreeTouch qt_4 = Adafruit_FreeTouch(A5, OVERSAMPLE_4, RESISTOR_50K, FREQ_MODE_NONE);
+
+
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(30, 4, NEO_GRB + NEO_KHZ800);
+
+bool stripEnabled = true;
 
 typedef struct {        // Struct is defined before including config.h --
   int8_t  select;       // pin numbers for each eye's screen select line
@@ -295,6 +307,14 @@ void setup(void) {
 #endif
 
   startTime = millis(); // For frame-rate calculation
+  strip.begin();
+  strip.setBrightness(50);
+  strip.show();
+
+  qt_1.begin();
+  qt_2.begin();
+  qt_3.begin();
+  qt_4.begin();
 }
 
 
@@ -672,9 +692,36 @@ void split( // Subdivides motion path into two sub-paths w/randimization
 
 #endif // !LIGHT_PIN
 
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+  if(WheelPos < 85) {
+   return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+  } else if(WheelPos < 170) {
+   WheelPos -= 85;
+   return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  } else {
+   WheelPos -= 170;
+   return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+}
+
 // MAIN LOOP -- runs continuously after setup() ----------------------------
 
+uint8_t j = 0;
+
 void loop() {
+  if (qt_1.measure() > 700) {
+    stripEnabled = !stripEnabled;
+  }
+  if (stripEnabled) {
+    for(int32_t i=0; i< strip.numPixels(); i++) {
+       strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j*5) & 255));
+    }
+    j++;
+    strip.show();
+  }
+  
 
 #if defined(LIGHT_PIN) && (LIGHT_PIN >= 0) // Interactive iris
 

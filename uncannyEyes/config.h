@@ -15,11 +15,11 @@
 #endif
 
 // Enable ONE of these #includes -- HUGE graphics tables for various eyes:
-#include "graphics/defaultEye.h"      // Standard human-ish hazel eye -OR-
+//#include "graphics/defaultEye.h"      // Standard human-ish hazel eye -OR-
 //#include "graphics/dragonEye.h"     // Slit pupil fiery dragon/demon eye -OR-
 //#include "graphics/noScleraEye.h"   // Large iris, no sclera -OR-
 //#include "graphics/goatEye.h"       // Horizontal pupil goat/Krampus eye -OR-
-//#include "graphics/newtEye.h"       // Eye of newt -OR-
+#include "graphics/newtEye.h"       // Eye of newt -OR-
 //#include "graphics/terminatorEye.h" // Git to da choppah!
 //#include "graphics/catEye.h"        // Cartoonish cat (flat "2D" colors)
 //#include "graphics/owlEye.h"        // Minerva the owl (DISABLE TRACKING)
